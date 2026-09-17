@@ -1,0 +1,66 @@
+[project]
+name = "labtrack"
+version = "0.1.0"
+description = "A Django application for recording, converting, and visualizing laboratory results"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "django~=5.2",
+    "django-htmx>=1.29.0",
+    "psycopg[binary]>=3.3.5",
+]
+
+[dependency-groups]
+dev = [
+    "django-stubs>=6.1.1",
+    "hypothesis>=6.168.0",
+    "mypy>=2.3.1",
+    "pre-commit>=4.6.2",
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "pytest-django>=4.14.0",
+    "ruff>=0.16.7",
+]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "-ra",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+extend-exclude = [
+    "*/migrations/*.py",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "I",
+    "B",
+    "UP",
+    "SIM",
+    "RUF",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"src/config/settings/*.py" = ["F403", "F405"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mypy]
+python_version = "3.13"
+mypy_path = "src"
+plugins = ["mypy_django_plugin.main"]
+strict = true
+
+[tool.django-stubs]
+django_settings_module = "config.settings.development"

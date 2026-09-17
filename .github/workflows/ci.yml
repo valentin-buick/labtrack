@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: labtrack
+          POSTGRES_USER: labtrack
+          POSTGRES_PASSWORD: labtrack
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U labtrack -d labtrack"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.13
+
+      - name: Install dependencies
+        run: uv sync --locked
+
+      - name: Ruff
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+
+      - name: Mypy
+        run: uv run mypy .
+
+      - name: Tests
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings.test
+          POSTGRES_DB: labtrack
+          POSTGRES_USER: labtrack
+          POSTGRES_PASSWORD: labtrack
+          POSTGRES_HOST: 127.0.0.1
+          POSTGRES_PORT: 5432
+        run: uv run pytest --cov
